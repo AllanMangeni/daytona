@@ -331,7 +331,8 @@ func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, works
 		Defaults:      projectDefaults,
 	}
 
-	err = create.RunSubmissionForm(submissionFormConfig)
+	pcImportFlag := false
+	err = create.RunSubmissionForm(submissionFormConfig, &pcImportFlag)
 	if err != nil {
 		return err
 	}
@@ -488,7 +489,7 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 				return nil
 			}
 
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
@@ -503,7 +504,7 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 				connectChan <- dialConn.Close()
 				return
 			}
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 
