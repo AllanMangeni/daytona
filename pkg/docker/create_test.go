@@ -55,7 +55,9 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 	s.mockClient.On("ContainerRemove", mock.Anything, mock.Anything, container.RemoveOptions{RemoveVolumes: true, Force: true}).Return(nil)
 	s.mockClient.On("ContainerStart", mock.Anything, mock.Anything, container.StartOptions{}).Return(nil)
 	s.mockClient.On("ContainerExecCreate", mock.Anything, mock.Anything, mock.Anything).Return(types.IDResponse{ID: "exec-id"}, nil)
-	s.mockClient.On("ContainerStop", mock.Anything, "123", container.StopOptions{}).Return(nil)
+	s.mockClient.On("ContainerStop", mock.Anything, "123", container.StopOptions{
+		Signal: "SIGKILL",
+	}).Return(nil)
 
 	_, client := net.Pipe()
 	s.mockClient.On("ContainerExecAttach", mock.Anything, "exec-id", container.ExecStartOptions{}).
@@ -80,7 +82,7 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		},
 	}, networkingConfig, platform, fmt.Sprintf("git-clone-%s-%s", project1.WorkspaceId, project1.Name),
 	).Return(container.CreateResponse{ID: "123"}, nil)
-	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1),
+	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1, nil),
 		&container.HostConfig{
 			Privileged: true,
 			ExtraHosts: []string{

@@ -25,6 +25,8 @@ import (
 )
 
 func (a *Agent) Start() error {
+	errChan := make(chan error)
+
 	a.initLogs()
 
 	log.Info("Starting Daytona Agent")
@@ -36,16 +38,31 @@ func (a *Agent) Start() error {
 		if err != nil {
 			return err
 		}
+
+		go func() {
+			err := a.Toolbox.Start()
+			if err != nil {
+				errChan <- err
+			}
+		}()
 	}
 
 	go func() {
 		err := a.Ssh.Start()
 		if err != nil {
-			log.Error(fmt.Sprintf("failed to start ssh server: %s", err))
+			errChan <- err
 		}
 	}()
 
-	return a.Tailscale.Start()
+	go func() {
+		err := a.Tailscale.Start()
+		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	log.Info("Daytona Agent started")
+	return <-errChan
 }
 
 func (a *Agent) startProjectMode() error {
@@ -54,74 +71,76 @@ func (a *Agent) startProjectMode() error {
 		return err
 	}
 
-	project, err := a.getProject()
-	if err != nil {
-		return err
-	}
+	if a.Config.SkipClone == "" {
+		project, err := a.getProject()
+		if err != nil {
+			return err
+		}
 
-	// Ignoring error because we don't want to fail if the git provider is not found
-	gitProvider, _ := a.getGitProvider(project.Repository.Url)
+		// Ignoring error because we don't want to fail if the git provider is not found
+		gitProvider, _ := a.getGitProvider(project.Repository.Url)
 
-	var auth *http.BasicAuth
-	if gitProvider != nil {
-		auth = &http.BasicAuth{}
-		auth.Username = gitProvider.Username
-		auth.Password = gitProvider.Token
-	}
+		var auth *http.BasicAuth
+		if gitProvider != nil {
+			auth = &http.BasicAuth{}
+			auth.Username = gitProvider.Username
+			auth.Password = gitProvider.Token
+		}
 
-	exists, err := a.Git.RepositoryExists()
-	if err != nil {
-		log.Error(fmt.Sprintf("failed to clone repository: %s", err))
-	} else {
-		if exists {
-			log.Info("Repository already exists. Skipping clone...")
+		exists, err := a.Git.RepositoryExists()
+		if err != nil {
+			log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 		} else {
-			if stat, err := os.Stat(a.Config.ProjectDir); err == nil {
-				ownerUid := stat.Sys().(*syscall.Stat_t).Uid
-				if ownerUid != uint32(os.Getuid()) {
-					chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", project.User, project.User), a.Config.ProjectDir)
-					err = chownCmd.Run()
-					if err != nil {
-						log.Error(err)
+			if exists {
+				log.Info("Repository already exists. Skipping clone...")
+			} else {
+				if stat, err := os.Stat(a.Config.ProjectDir); err == nil {
+					ownerUid := stat.Sys().(*syscall.Stat_t).Uid
+					if ownerUid != uint32(os.Getuid()) {
+						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", project.User, project.User), a.Config.ProjectDir)
+						err = chownCmd.Run()
+						if err != nil {
+							log.Error(err)
+						}
 					}
 				}
-			}
 
-			log.Info("Cloning repository...")
-			err = a.Git.CloneRepository(project.Repository, auth)
+				log.Info("Cloning repository...")
+				err = a.Git.CloneRepository(project.Repository, auth)
+				if err != nil {
+					log.Error(fmt.Sprintf("failed to clone repository: %s", err))
+				} else {
+					log.Info("Repository cloned")
+				}
+			}
+		}
+
+		var gitUser *gitprovider.GitUser
+		if gitProvider != nil {
+			user, err := a.getGitUser(gitProvider.Id)
 			if err != nil {
-				log.Error(fmt.Sprintf("failed to clone repository: %s", err))
+				log.Error(fmt.Sprintf("failed to get git user data: %s", err))
 			} else {
-				log.Info("Repository cloned")
+				gitUser = &gitprovider.GitUser{
+					Email:    user.Email,
+					Name:     user.Name,
+					Id:       user.Id,
+					Username: user.Username,
+				}
 			}
 		}
-	}
 
-	var gitUser *gitprovider.GitUser
-	if gitProvider != nil {
-		user, err := a.getGitUser(gitProvider.Id)
+		var providerConfig *gitprovider.GitProviderConfig
+		if gitProvider != nil {
+			providerConfig = &gitprovider.GitProviderConfig{
+				SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+				SigningKey:    gitProvider.SigningKey,
+			}
+		}
+		err = a.Git.SetGitConfig(gitUser, providerConfig)
 		if err != nil {
-			log.Error(fmt.Sprintf("failed to get git user data: %s", err))
-		} else {
-			gitUser = &gitprovider.GitUser{
-				Email:    user.Email,
-				Name:     user.Name,
-				Id:       user.Id,
-				Username: user.Username,
-			}
+			log.Error(fmt.Sprintf("failed to set git config: %s", err))
 		}
-	}
-
-	var providerConfig *gitprovider.GitProviderConfig
-	if gitProvider != nil {
-		providerConfig = &gitprovider.GitProviderConfig{
-			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
-			SigningKey:    gitProvider.SigningKey,
-		}
-	}
-	err = a.Git.SetGitConfig(gitUser, providerConfig)
-	if err != nil {
-		log.Error(fmt.Sprintf("failed to set git config: %s", err))
 	}
 
 	go func() {
@@ -235,9 +254,13 @@ func (a *Agent) updateProjectState() error {
 		return err
 	}
 
-	gitStatus, err := a.Git.GetGitStatus()
-	if err != nil {
-		return err
+	var gitStatus *project.GitStatus
+	if a.Config.SkipClone == "" {
+		var err error
+		gitStatus, err = a.Git.GetGitStatus()
+		if err != nil {
+			return err
+		}
 	}
 
 	uptime := a.uptime()
