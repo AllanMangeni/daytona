@@ -15,8 +15,13 @@
       "gitUrl": "https://github.com/daytonaio/sample-ubuntu"
   },
   {
-      "name": "C/C++",
-      "description": "Develop C++ applications on Linux. Includes Debian C++ build tools.",
+      "name": "C",
+      "description": "Develop C applications on Linux. Includes Debian C/C++ build tools.",
+      "gitUrl": "https://github.com/daytonaio/sample-c"
+  },
+  {
+      "name": "C++",
+      "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
       "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
   {
@@ -33,6 +38,16 @@
       "name": "Java",
       "description": "Develop Java applications. Includes the JDK and Java extensions.",
       "gitUrl": "https://github.com/daytonaio/sample-java"
+  },
+  {
+    "name": "Julia (Genie)",
+    "description": "Develop Julia based applications with Genie framework. Includes needed tools, extensions, framework and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
+  },
+  {
+    "name": "Julia",
+    "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
+    "gitUrl": "https://github.com/daytonaio/sample-julia"
   },
   {
       "name": "PHP",
@@ -58,5 +73,160 @@
       "name": "Node / TypeScript",
       "description": "Develop Node.js based applications in TypeScript. Includes Node.js, eslint, nvm, yarn, and the TypeScript compiler.",
       "gitUrl": "https://github.com/daytonaio/sample-typescript-node"
+  },
+  {
+      "name": "Next.js - OpenSourceSmith",
+      "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
+      "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
+  },
+  {
+      "name": "Next.js - MindmapCopilot",
+      "description": "Mindmap Copilot, a tool that can simplify the mindmap creation with the help of a copilot. Built using NextJs, TypeCcript, CopilotKit, ShadCN, Tailwind.",
+      "gitUrl": "https://github.com/daytonaio/sample-mindmap-copilot"
+  },
+  {
+      "name": "Next.js - RecipeGenie",
+      "description": "Recipe Genie, an app for exploring delicious recipes, powered by TheMealDB. Built using NextJs, JavaScript, react-shepherd, Tailwind, DaisyUI.",
+      "gitUrl": "https://github.com/daytonaio/sample-recipe-genie"
+  },
+  {
+    "name": "React.js - Cropify",
+    "description": "Cropify, a fast and user-friendly image cropping tool with features like adjustable crop areas, aspect ratio presets, and instant previews. Built using React.js, Vite, Mantine, and React Easy Crop.",
+    "gitUrl": "https://github.com/daytonaio/sample-image-crop"
+  },
+  {
+    "name": "Next.js - Cal Buddy",
+    "description": "Cal Buddy, is a smart calendar assistant that helps you schedule, manage, and chat with your calendar. It helps you boost your productivity with AI-powered task management.",
+    "gitUrl": "https://github.com/daytonaio/sample-calendar-buddy"
+  },
+  {
+    "name": "React.js - TerraGrow",
+    "description": "TerraGrow is an AI-powered app that provides crop recommendations and yield improvement strategies by analyzing environmental factors like soil nutrients, temperature, humidity, and pH. It helps farmers optimize planting decisions for higher yields.",
+    "gitUrl": "https://github.com/daytonaio/sample-crops-ml"
+  },
+  {
+    "name": "React.js - AI Text Summarization and Analysis",
+    "description": "A beginner-friendly application designed to transform long texts into quick summaries, key insights, and fun mnemonics. It prompts you to enter a text and helps you get the gist of it.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-text-AI"
+  },
+  {
+    "name": "Next.js - Video Generation AI",
+    "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
+    "gitUrl": "https://github.com/daytonaio/sample-video-generator"
+  }, 
+  {
+    "name": "Django - CrisisMonitor",
+    "description": "Crisis Monitor is a web application designed to track natural disasters and display information through an interactive dashboard. Built with HTML, CSS, JavaScript, and Django (Python), it features a responsive design for seamless usability.",
+    "gitUrl": "https://github.com/daytonaio/sample-django-crisis-monitor"
+  },
+  {
+    "name": "Flask - AI Playlist Generator",
+    "description": "A Python-based application that dynamically generates playlists based on the user's emotional state and inputs, using APIs and machine learning techniques.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-ai-playlist-generator"
+  },
+  { 
+     "name": "Rust - Actix Web Server", 
+     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.", 
+     "gitUrl": "https://github.com/daytonaio/sample-rust-actix" 
+  },
+  {
+    "name": "Next.js - Festigo",
+    "description": "Festigo is an event planning and event organizing website that bring guests, vendors and event organizers(the people hosting the event) under a single umbrella.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-event-planner"
+  },
+  {
+    "name": "Next.js - Cooperword",
+    "description":"The COOPER WORD is a web-based tool designed to help users create, manage, and view events in a calendar format. Built using React, Next.js, and TypeScript, this application provides a user-friendly interface with intuitive functionality for effective event management.",
+    "gitUrl":"https://github.com/daytonaio/sample-nextjs-ai-event-manager.git"
+  },
+  {
+      "name": "Python/Flask - ai-code-reviwer",
+      "description": "Get the feedback on your code and also can translate it to another programming language",
+      "gitUrl": "https://github.com/daytonaio/sample-python-ai-code-review"
+  },
+  {
+      "name": "Python/Streamlit - LinearPredictor",
+      "description": "LinearPredictor is an interactive web application designed to help users build and explore simple linear regression models.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-linear-predictor"
+  },
+  {
+    "name": "React.js - carecradle",
+    "description": "CareCradle is an open-source, generative AI-powered assistant designed to provide comprehensive information, advice, and support for expectant mothers during their pregnancy journey.",
+    "gitUrl": "https://github.com/daytonaio/sample-ai-carecradle"
+  },
+  {
+    "name": "React.js - GH-Search",
+    "description": "GH-Search is a project built using github's rest api and react that allows us to search and gather information about various github users.",
+    "gitUrl": "https://github.com/daytonaio/sample-github-user-search.git"
+  },
+  {
+    "name": "React.js - Ex-con-thrive",
+    "description": "Ex-Cons Thrive is a project designed to help formerly incarcerated individuals reintegrate into society by providing job search assistance, legal support, mental health services, and more.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-job-assistant"
+  },
+  {
+    "name": "Python/Django - Project Management",
+    "description": "Project Managemment transforms the thesis project management system at Tribhuvan University into a dynamic web application using Django, enhancing collaboration and efficiency for all teachers and students.",
+    "gitUrl": "https://github.com/daytonaio/sample-django-project-manager"
+  },
+  {
+    "name": "Python/Streamlit - DocBot",
+    "description": "DocBot is a Streamlit web application that enables interactive conversations with PDF documents using Gemini AI, providing insightful responses based on the document's content.",
+    "gitUrl": "https://github.com/daytonaio/sample-streamlit-ai-document-insights"
+  },
+  {
+    "name": "Python/Flask - CodeChatter",
+    "description": "CodeChatter v2 is an advanced Flask-based application that harnesses the power of the Groq API to provide intelligent coding assistance.",
+    "gitUrl": "https://github.com/daytonaio/sample-flask-groq-code-assistant"
+  },
+  {
+    "name": "AstroJS + Sanity CMS Blog",
+    "description": "A minimalistic blog built using AstroJS and Sanity CMS for content management, showcasing how incredibly developer-friendly it is to create a blog. With added benefits of Daytona",
+    "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
+  },
+  {
+    "name": "NextJs/MindsDb - WordWave",
+    "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
+  },
+  {
+    "name": "React.js - effective-scrapper",
+    "description": "Effective Scrapper is a web application designed to simplify the job search process for individuals interested in roles within the technology industry.",
+    "gitUrl": "https://github.com/daytonaio/sample-js-job-scaper"
+  },
+  {
+    "name": "Bun/Next.js - Therabot",
+    "description": "Therabot is a mental health chatbot that provides support and resources for individuals experiencing mental health challenges.",
+    "gitUrl": "https://github.com/daytonaio/sample-bun-nextjs-therabot"
+  },
+  {
+    "name": "Go CRUD - Redis",
+    "description": "A simple backend HTTP server which does the CRUD (Create, Read, Update, Delete) operation. It uses Chi router for the http connection and Redis for the storage.",
+    "gitUrl": "https://github.com/daytonaio/sample-go-crud-redis"
+  },
+  {
+    "name": "Sample Bun Web Server",
+    "description": "An HTTP server showcasing routing and template rendering with EJS, powered by Bun, a high-performance JavaScript runtime and toolkit.",
+    "gitUrl": "https://github.com/daytonaio/sample-bun-web-server"
+  },
+  {
+    "name": "Python - AskPixie",
+    "description": "A Python-powered educational platform leveraging Reflex and Google's Gemini API for domain-specific insights, text and image analysis, and enhanced learning experiences.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-ask-pixie"
+  },
+  {
+    "name": "Typescript-Gemini - FitnessAssistant",
+    "description": "Fitness Assistant demonstrates how to build a backend application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
+    "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
+  },
+  {
+    "name": "Keyword Density Application",
+    "description": "A tool to calculate keyword density from large text / raw html / direct URL.",
+    "gitUrl": "https://github.com/daytonaio/sample-laravel-keyword-density"
+  },
+  {
+    "name": "Github User Profile Analyzer",
+    "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-github-user-insights"
   }
 ]
