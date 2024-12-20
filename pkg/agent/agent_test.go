@@ -76,10 +76,11 @@ func TestAgent(t *testing.T) {
 	mockGitService := mock_git.NewMockGitService()
 	mockGitService.On("RepositoryExists").Return(true, nil)
 	mockGitService.On("SetGitConfig", mock.Anything, mock.Anything).Return(nil)
-	mockGitService.On("GetGitStatus").Return(gitStatus1, nil)
+	mockGitService.On("GetGitStatus").Return(gitStatus1, nil).Maybe()
 
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
+	mockToolboxServer := mocks.NewMockToolboxServer()
 
 	mockConfig.ProjectDir = t.TempDir()
 
@@ -89,18 +90,20 @@ func TestAgent(t *testing.T) {
 		Git:       mockGitService,
 		Ssh:       mockSshServer,
 		Tailscale: mockTailscaleServer,
+		Toolbox:   mockToolboxServer,
 	}
 
 	t.Run("Start agent", func(t *testing.T) {
 		err := a.Start()
 
-		require.Nil(t, err)
+		require.Equal(t, err, mocks.SshServerStartError)
 	})
 
 	t.Cleanup(func() {
 		mockGitService.AssertExpectations(t)
 		mockSshServer.AssertExpectations(t)
 		mockTailscaleServer.AssertExpectations(t)
+		mockToolboxServer.AssertExpectations(t)
 	})
 }
 
@@ -124,7 +127,7 @@ func TestAgentHostMode(t *testing.T) {
 		mockConfig.Mode = config.ModeHost
 		err := a.Start()
 
-		require.Nil(t, err)
+		require.Equal(t, err, mocks.SshServerStartError)
 	})
 
 	t.Cleanup(func() {

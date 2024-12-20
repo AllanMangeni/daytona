@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -21,16 +22,17 @@ var project1 = &project.Project{
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
+	BuildConfig: &buildconfig.BuildConfig{},
 	Image:       "test-image:tag",
 	User:        "test-user",
 	WorkspaceId: "123",
-	Target:      "local",
+	Target:      "test",
 }
 
 var workspace1 = &workspace.Workspace{
 	Id:     "123",
 	Name:   "test",
-	Target: "local",
+	Target: "test",
 	Projects: []*project.Project{
 		project1,
 	},
