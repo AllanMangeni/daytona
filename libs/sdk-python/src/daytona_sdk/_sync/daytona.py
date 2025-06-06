@@ -85,6 +85,7 @@ class Daytona:
             from daytona_sdk import Daytona, DaytonaConfig
             # Using environment variables
             daytona1 = Daytona()
+
             # Using explicit configuration
             config = DaytonaConfig(
                 api_key="your-api-key",
@@ -92,6 +93,7 @@ class Daytona:
                 target="us"
             )
             daytona2 = Daytona(config)
+
             ```
         """
 
@@ -186,7 +188,8 @@ class Daytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout or auto_stop_interval is negative; If sandbox fails to start or times out
+            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+                If sandbox fails to start or times out
 
         Example:
             Create a default Python Sandbox:
@@ -201,7 +204,8 @@ class Daytona:
                 image="debian:12.9",
                 env_vars={"DEBUG": "true"},
                 resources=SandboxResources(cpu=2, memory=4),
-                auto_stop_interval=0
+                auto_stop_interval=0,
+                auto_archive_interval=60
             )
             sandbox = daytona.create(params, 40)
             ```
@@ -243,7 +247,8 @@ class Daytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout or auto_stop_interval is negative; If sandbox fails to start or times out
+            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+                If sandbox fails to start or times out
         """
         code_toolbox = self._get_code_toolbox(params)
 
@@ -252,6 +257,9 @@ class Daytona:
 
         if params.auto_stop_interval is not None and params.auto_stop_interval < 0:
             raise DaytonaError("auto_stop_interval must be a non-negative integer")
+
+        if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
+            raise DaytonaError("auto_archive_interval must be a non-negative integer")
 
         target = self.target
 
@@ -263,6 +271,7 @@ class Daytona:
             public=params.public,
             target=str(target) if target else None,
             auto_stop_interval=params.auto_stop_interval,
+            auto_archive_interval=params.auto_archive_interval,
             volumes=params.volumes,
         )
 

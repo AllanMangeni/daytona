@@ -34,6 +34,7 @@ import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
 import { ImageNode } from '../entities/image-node.entity'
+import { OtelSpan } from '../../common/decorators/otel.decorator'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 const SYNC_AGAIN = true
@@ -60,6 +61,7 @@ export class WorkspaceManager {
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
+  @OtelSpan()
   async autostopCheck(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const snapshotCheckWorkerSelected = await this.redis.get('auto-stop-check-worker-selected')
@@ -81,6 +83,8 @@ export class WorkspaceManager {
             nodeId: node.id,
             organizationId: Not(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION),
             state: WorkspaceState.STARTED,
+            desiredState: WorkspaceDesiredState.STARTED,
+            pending: false,
             autoStopInterval: Not(0),
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoStopInterval"`),
           },
@@ -116,7 +120,67 @@ export class WorkspaceManager {
     )
   }
 
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
+  async autoArchiveCheck(): Promise<void> {
+    //  lock the sync to only run one instance at a time
+    const autoArchiveCheckWorkerSelected = await this.redis.get('auto-archive-check-worker-selected')
+    if (autoArchiveCheckWorkerSelected) {
+      return
+    }
+    //  keep the worker selected for 1 minute
+    await this.redis.setex('auto-archive-check-worker-selected', 60, '1')
+
+    // Get all ready nodes
+    const allNodes = await this.nodeService.findAll()
+    const readyNodes = allNodes.filter((node) => node.state === NodeState.READY)
+
+    // Process all nodes in parallel
+    await Promise.all(
+      readyNodes.map(async (node) => {
+        const workspaces = await this.workspaceRepository.find({
+          where: {
+            nodeId: node.id,
+            organizationId: Not(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION),
+            state: WorkspaceState.STOPPED,
+            desiredState: WorkspaceDesiredState.STOPPED,
+            pending: false,
+            lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
+          },
+          order: {
+            lastSnapshotAt: 'ASC',
+          },
+          //  max 3 workspaces can be archived at the same time on the same node
+          //  this is to prevent the node from being overloaded
+          take: 3,
+        })
+
+        await Promise.all(
+          workspaces.map(async (workspace) => {
+            const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
+            const acquired = await this.redisLockProvider.lock(lockKey, 30)
+            if (!acquired) {
+              return
+            }
+
+            try {
+              workspace.desiredState = WorkspaceDesiredState.ARCHIVED
+              await this.workspaceRepository.save(workspace)
+              await this.redisLockProvider.unlock(lockKey)
+              this.syncInstanceState(workspace.id)
+            } catch (error) {
+              this.logger.error(
+                `Error processing auto-archive state for workspace ${workspace.id}:`,
+                fromAxiosError(error),
+              )
+            }
+          }),
+        )
+      }),
+    )
+  }
+
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
+  @OtelSpan()
   async syncStates(): Promise<void> {
     const lockKey = 'sync-states'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {

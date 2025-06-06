@@ -15,7 +15,7 @@ from daytona_api_client_async import ToolboxApi as ToolboxApi
 from daytona_api_client_async import VolumesApi as VolumesApi
 from daytona_api_client_async import WorkspaceApi as SandboxApi
 from daytona_api_client_async import WorkspaceState as SandboxState
-from daytona_sdk._async.object_storage import ObjectStorage
+from daytona_sdk._async.object_storage import AsyncObjectStorage
 from daytona_sdk._async.sandbox import AsyncSandbox, SandboxTargetRegion
 from daytona_sdk._async.volume import AsyncVolumeService
 from daytona_sdk._utils.enum import to_enum
@@ -46,8 +46,8 @@ class AsyncDaytona:
     Example:
         Using environment variables:
         ```python
-        daytona = AsyncDaytona()  # Uses DAYTONA_API_KEY, DAYTONA_API_URL
-        sandbox = await daytona.create()
+        async with AsyncDaytona() as daytona:  # Uses DAYTONA_API_KEY, DAYTONA_API_URL
+            sandbox = await daytona.create()
         ```
 
         Using explicit configuration:
@@ -57,8 +57,11 @@ class AsyncDaytona:
             api_url="https://your-api.com",
             target="us"
         )
-        daytona = AsyncDaytona(config)
-        sandbox = await daytona.create()
+        try:
+            daytona = AsyncDaytona(config)
+            sandbox = await daytona.create()
+        finally:
+            await daytona.close()
         ```
     """
 
@@ -81,6 +84,7 @@ class AsyncDaytona:
             from daytona_sdk import Daytona, DaytonaConfig
             # Using environment variables
             daytona1 = AsyncDaytona()
+            await daytona1.close()
             # Using explicit configuration
             config = DaytonaConfig(
                 api_key="your-api-key",
@@ -88,6 +92,7 @@ class AsyncDaytona:
                 target="us"
             )
             daytona2 = AsyncDaytona(config)
+            await daytona2.close()
             ```
         """
 
@@ -220,7 +225,8 @@ class AsyncDaytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout or auto_stop_interval is negative; If sandbox fails to start or times out
+            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+                If sandbox fails to start or times out
 
         Example:
             Create a default Python Sandbox:
@@ -235,7 +241,8 @@ class AsyncDaytona:
                 image="debian:12.9",
                 env_vars={"DEBUG": "true"},
                 resources=SandboxResources(cpu=2, memory=4),
-                auto_stop_interval=0
+                auto_stop_interval=0,
+                auto_archive_interval=60
             )
             sandbox = await daytona.create(params, 40)
             ```
@@ -277,7 +284,8 @@ class AsyncDaytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout or auto_stop_interval is negative; If sandbox fails to start or times out
+            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+                If sandbox fails to start or times out
         """
         code_toolbox = self._get_code_toolbox(params)
 
@@ -286,6 +294,9 @@ class AsyncDaytona:
 
         if params.auto_stop_interval is not None and params.auto_stop_interval < 0:
             raise DaytonaError("auto_stop_interval must be a non-negative integer")
+
+        if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
+            raise DaytonaError("auto_archive_interval must be a non-negative integer")
 
         target = self.target
 
@@ -297,6 +308,7 @@ class AsyncDaytona:
             public=params.public,
             target=str(target) if target else None,
             auto_stop_interval=params.auto_stop_interval,
+            auto_archive_interval=params.auto_archive_interval,
             volumes=params.volumes,
         )
 
@@ -694,7 +706,7 @@ class AsyncDaytona:
             return []
 
         push_access_creds = await self.object_storage_api.get_push_access()
-        object_storage = ObjectStorage(
+        object_storage = AsyncObjectStorage(
             push_access_creds.storage_url,
             push_access_creds.access_key,
             push_access_creds.secret,
