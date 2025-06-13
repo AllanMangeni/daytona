@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0.0", "wheel>=0.41.2", "build>=1.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "daytona_sdk"
+name = "daytona"
 version = "0.0.0-dev"
 authors = [
     { name = "Daytona Platforms Inc.", email = "support@daytona.io"  },
@@ -12,8 +12,8 @@ description = "Python SDK for Daytona"
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "daytona_api_client>=0.19.1,<0.20.0",
-    "daytona_api_client_async>=0.19.1,<0.20.0",
+    "daytona_api_client>=0.20.1,<0.21.0",
+    "daytona_api_client_async>=0.20.1,<0.21.0",
     "environs>=9.5.0,<10.0.0",
     "marshmallow>=3.19.0,<4.0.0",
     "pydantic>=2.4.2,<3.0.0",
@@ -26,7 +26,8 @@ dependencies = [
     "aiohttp_retry>=2.9.0,<3.0.0",
     "toml>=0.10.0,<0.11.0",
     "aioboto3>=14.0.0,<15.0.0",
-    "boto3>=1.0.0,<2.0.0"
+    "boto3>=1.0.0,<2.0.0",
+    "importlib-metadata>=1.0.0,<6.0.0; python_version<'3.8'"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

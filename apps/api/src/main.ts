@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import './tracing'
 import { readFileSync } from 'node:fs'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -16,10 +17,11 @@ import { MetricsInterceptor } from './interceptors/metrics.interceptor'
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface'
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
-import { NodeService } from './workspace/services/node.service'
-import { NodeRegion } from './workspace/enums/node-region.enum'
-import { WorkspaceClass } from './workspace/enums/workspace-class.enum'
+import { RunnerService } from './sandbox/services/runner.service'
+import { RunnerRegion } from './sandbox/enums/runner-region.enum'
+import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
+import { SchedulerRegistry } from '@nestjs/schedule'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -79,14 +81,25 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix)
 
   const documentFactory = () => SwaggerModule.createDocument(app, getOpenApiConfig(configService.get('oidc.issuer')))
-  SwaggerModule.setup('api', app, documentFactory)
+  SwaggerModule.setup('api', app, documentFactory, {
+    swaggerOptions: {
+      initOAuth: {
+        clientId: configService.get('oidc.clientId'),
+        appName: 'Daytona AI',
+        scopes: ['openid', 'profile', 'email'],
+        additionalQueryStringParams: {
+          audience: configService.get('oidc.audience'),
+        },
+      },
+    },
+  })
 
-  // Auto create nodes only in local development environment
+  // Auto create runners only in local development environment
   if (!configService.get('production')) {
-    const nodeService = app.get(NodeService)
-    const nodes = await nodeService.findAll()
-    if (!nodes.find((node) => node.domain === 'localtest.me:3003')) {
-      await nodeService.create({
+    const runnerService = app.get(RunnerService)
+    const runners = await runnerService.findAll()
+    if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
+      await runnerService.create({
         apiUrl: 'http://localhost:3003',
         apiKey: 'secret_api_token',
         cpu: 4,
@@ -95,10 +108,19 @@ async function bootstrap() {
         gpu: 0,
         gpuType: 'none',
         capacity: 100,
-        region: NodeRegion.US,
-        class: WorkspaceClass.SMALL,
+        region: RunnerRegion.US,
+        class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
       })
+    }
+  }
+
+  // Stop all cron jobs if maintenance mode is enabled
+  if (configService.get('maintananceMode')) {
+    await app.init()
+    const schedulerRegistry = app.get(SchedulerRegistry)
+    for (const cronName of schedulerRegistry.getCronJobs().keys()) {
+      schedulerRegistry.deleteCronJob(cronName)
     }
   }
 

@@ -21,7 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client.models.create_build_info import CreateBuildInfo
-from daytona_api_client.models.workspace_volume import WorkspaceVolume
+from daytona_api_client.models.sandbox_volume import SandboxVolume
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -44,12 +44,17 @@ class CreateWorkspace(BaseModel):
     )
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the workspace")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the workspace")
-    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in MB")
+    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the workspace in GB")
     auto_stop_interval: Optional[StrictInt] = Field(
         default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"
     )
-    volumes: Optional[List[WorkspaceVolume]] = Field(
+    auto_archive_interval: Optional[StrictInt] = Field(
+        default=None,
+        description="Auto-archive interval in minutes (0 means the maximum interval will be used)",
+        alias="autoArchiveInterval",
+    )
+    volumes: Optional[List[SandboxVolume]] = Field(
         default=None, description="Array of volumes to attach to the workspace"
     )
     build_info: Optional[CreateBuildInfo] = Field(
@@ -69,6 +74,7 @@ class CreateWorkspace(BaseModel):
         "memory",
         "disk",
         "autoStopInterval",
+        "autoArchiveInterval",
         "volumes",
         "buildInfo",
     ]
@@ -175,7 +181,8 @@ class CreateWorkspace(BaseModel):
                 "memory": obj.get("memory"),
                 "disk": obj.get("disk"),
                 "autoStopInterval": obj.get("autoStopInterval"),
-                "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]]
+                "autoArchiveInterval": obj.get("autoArchiveInterval"),
+                "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]]
                 if obj.get("volumes") is not None
                 else None,
                 "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
