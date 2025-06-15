@@ -1,4 +1,7 @@
 # coding: utf-8
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 
 """
     Daytona
@@ -18,8 +21,9 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -33,8 +37,9 @@ class CreateApiKey(BaseModel):
     permissions: List[StrictStr] = Field(
         description="The list of organization resource permissions assigned to the API key"
     )
+    expires_at: Optional[datetime] = Field(default=None, description="When the API key expires", alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "permissions"]
+    __properties: ClassVar[List[str]] = ["name", "permissions", "expiresAt"]
 
     @field_validator("permissions")
     def permissions_validate_enum(cls, value):
@@ -44,8 +49,8 @@ class CreateApiKey(BaseModel):
                 [
                     "write:registries",
                     "delete:registries",
-                    "write:images",
-                    "delete:images",
+                    "write:snapshots",
+                    "delete:snapshots",
                     "write:sandboxes",
                     "delete:sandboxes",
                     "read:volumes",
@@ -54,7 +59,7 @@ class CreateApiKey(BaseModel):
                 ]
             ):
                 raise ValueError(
-                    "each list item must be one of ('write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')"
+                    "each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')"
                 )
         return value
 
@@ -105,6 +110,11 @@ class CreateApiKey(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if expires_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_at is None and "expires_at" in self.model_fields_set:
+            _dict["expiresAt"] = None
+
         return _dict
 
     @classmethod
@@ -116,7 +126,9 @@ class CreateApiKey(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"name": obj.get("name"), "permissions": obj.get("permissions")})
+        _obj = cls.model_validate(
+            {"name": obj.get("name"), "permissions": obj.get("permissions"), "expiresAt": obj.get("expiresAt")}
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
