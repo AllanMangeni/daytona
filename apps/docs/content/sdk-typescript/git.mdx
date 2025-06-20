@@ -13,17 +13,15 @@ Provides Git operations within a Sandbox.
 
 ```ts
 new Git(
-   sandbox: Sandbox,
+   sandboxId: string,
    toolboxApi: ToolboxApi,
-   instance: SandboxInstance,
    getRootDir: () => Promise<string>): Git
 ```
 
 **Parameters**:
 
-- `sandbox` _Sandbox_
+- `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
-- `instance` _SandboxInstance_
 - `getRootDir` _\(\) =\> Promise\<string\>_
 
 **Returns**:
@@ -87,6 +85,32 @@ List branches in the repository.
 ```ts
 const response = await git.branches('workspace/repo')
 console.log(`Branches: ${response.branches}`)
+```
+
+---
+
+#### checkoutBranch()
+
+```ts
+checkoutBranch(path: string, branch: string): Promise<void>
+```
+
+Checkout branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _string_ - Name of the branch to checkout
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.checkoutBranch('workspace/repo', 'new-feature')
 ```
 
 ---
@@ -176,6 +200,58 @@ Commits staged changes.
 // Stage and commit changes
 await git.add('workspace/repo', ['README.md'])
 await git.commit('workspace/repo', 'Update documentation', 'John Doe', 'john@example.com')
+```
+
+---
+
+#### createBranch()
+
+```ts
+createBranch(path: string, name: string): Promise<void>
+```
+
+Create branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _string_ - Name of the new branch to create
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.createBranch('workspace/repo', 'new-feature')
+```
+
+---
+
+#### deleteBranch()
+
+```ts
+deleteBranch(path: string, name: string): Promise<void>
+```
+
+Delete branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _string_ - Name of the branch to delete
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.deleteBranch('workspace/repo', 'new-feature')
 ```
 
 ---

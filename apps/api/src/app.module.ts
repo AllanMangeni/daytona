@@ -9,7 +9,7 @@ import { AppService } from './app.service'
 import { UserModule } from './user/user.module'
 import { TeamModule } from './team/team.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { WorkspaceModule } from './workspace/workspace.module'
+import { SandboxModule } from './sandbox/sandbox.module'
 import { AuthModule } from './auth/auth.module'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
@@ -28,6 +28,7 @@ import { TypedConfigModule } from './config/typed-config.module'
 import { NotificationModule } from './notification/notification.module'
 import { ObjectStorageModule } from './object-storage/object-storage.module'
 import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
+import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
 
 @Module({
   imports: [
@@ -85,7 +86,7 @@ import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
     AuthModule,
     UserModule,
     TeamModule,
-    WorkspaceModule,
+    SandboxModule,
     DockerRegistryModule,
     ScheduleModule.forRoot(),
     UsageModule,
@@ -114,5 +115,6 @@ import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(VersionHeaderMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
+    consumer.apply(MaintenanceMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
   }
 }

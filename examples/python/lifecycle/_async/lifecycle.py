@@ -1,7 +1,6 @@
 import asyncio
-from pprint import pprint
 
-from daytona_sdk import AsyncDaytona
+from daytona import AsyncDaytona
 
 
 async def main():
@@ -25,7 +24,7 @@ async def main():
         print("Sandbox started")
 
         print("Getting existing sandbox")
-        existing_sandbox = await daytona.get_current_sandbox(sandbox.id)
+        existing_sandbox = await daytona.get(sandbox.id)
         print("Get existing sandbox")
 
         response = await existing_sandbox.process.exec('echo "Hello World from exec!"', cwd="/home/daytona", timeout=10)
@@ -36,8 +35,8 @@ async def main():
 
         sandboxes = await daytona.list()
         print("Total sandboxes count:", len(sandboxes))
-        # This will show all attributes of the first sandbox
-        pprint(vars(await sandboxes[0].info()))
+
+        print(f"Printing sandboxes[0] -> id: {sandboxes[0].id} state: {sandboxes[0].state}")
 
         print("Removing sandbox")
         await daytona.delete(sandbox)

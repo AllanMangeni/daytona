@@ -1,3 +1,6 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 /*
 Daytona
 
@@ -22,47 +25,67 @@ var _ MappedNullable = &Workspace{}
 
 // Workspace struct for Workspace
 type Workspace struct {
-	// The ID of the workspace
+	// The ID of the sandbox
 	Id string `json:"id"`
-	// The name of the workspace
-	// Deprecated
-	Name string `json:"name"`
-	// The organization ID of the workspace
+	// The organization ID of the sandbox
 	OrganizationId string `json:"organizationId"`
-	// The image used for the workspace
-	Image *string `json:"image,omitempty"`
+	// The snapshot used for the sandbox
+	Snapshot *string `json:"snapshot,omitempty"`
 	// The user associated with the project
 	User string `json:"user"`
-	// Environment variables for the workspace
+	// Environment variables for the sandbox
 	Env map[string]string `json:"env"`
-	// Labels for the workspace
+	// Labels for the sandbox
 	Labels map[string]string `json:"labels"`
-	// Whether the workspace http preview is public
+	// Whether the sandbox http preview is public
 	Public bool `json:"public"`
-	// The target environment for the workspace
+	// The target environment for the sandbox
 	Target string `json:"target"`
-	// Additional information about the workspace
-	Info *WorkspaceInfo `json:"info,omitempty"`
-	// The CPU quota for the workspace
-	Cpu *float32 `json:"cpu,omitempty"`
-	// The GPU quota for the workspace
-	Gpu *float32 `json:"gpu,omitempty"`
-	// The memory quota for the workspace
-	Memory *float32 `json:"memory,omitempty"`
-	// The disk quota for the workspace
-	Disk *float32 `json:"disk,omitempty"`
-	// The state of the workspace
-	State *WorkspaceState `json:"state,omitempty"`
-	// The error reason of the workspace
+	// The CPU quota for the sandbox
+	Cpu float32 `json:"cpu"`
+	// The GPU quota for the sandbox
+	Gpu float32 `json:"gpu"`
+	// The memory quota for the sandbox
+	Memory float32 `json:"memory"`
+	// The disk quota for the sandbox
+	Disk float32 `json:"disk"`
+	// The state of the sandbox
+	State *SandboxState `json:"state,omitempty"`
+	// The error reason of the sandbox
 	ErrorReason *string `json:"errorReason,omitempty"`
+	// The state of the backup
+	BackupState *string `json:"backupState,omitempty"`
+	// The creation timestamp of the last backup
+	BackupCreatedAt *string `json:"backupCreatedAt,omitempty"`
+	// Auto-stop interval in minutes (0 means disabled)
+	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
+	// Auto-archive interval in minutes
+	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
+	// The domain name of the runner
+	RunnerDomain *string `json:"runnerDomain,omitempty"`
+	// Array of volumes attached to the sandbox
+	Volumes []SandboxVolume `json:"volumes,omitempty"`
+	// Build information for the sandbox
+	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	// The creation timestamp of the sandbox
+	CreatedAt *string `json:"createdAt,omitempty"`
+	// The last update timestamp of the sandbox
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// The class of the sandbox
+	// Deprecated
+	Class *string `json:"class,omitempty"`
+	// The version of the daemon running in the sandbox
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// The name of the workspace
+	Name string `json:"name"`
+	// The image used for the workspace
+	Image *string `json:"image,omitempty"`
 	// The state of the snapshot
 	SnapshotState *string `json:"snapshotState,omitempty"`
 	// The creation timestamp of the last snapshot
 	SnapshotCreatedAt *string `json:"snapshotCreatedAt,omitempty"`
-	// Auto-stop interval in minutes (0 means disabled)
-	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
-	// Array of volumes attached to the workspace
-	Volumes []WorkspaceVolume `json:"volumes,omitempty"`
+	// Additional information about the sandbox
+	Info *SandboxInfo `json:"info,omitempty"`
 }
 
 type _Workspace Workspace
@@ -71,16 +94,20 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(id string, name string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, target string) *Workspace {
+func NewWorkspace(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, target string, cpu float32, gpu float32, memory float32, disk float32, name string) *Workspace {
 	this := Workspace{}
 	this.Id = id
-	this.Name = name
 	this.OrganizationId = organizationId
 	this.User = user
 	this.Env = env
 	this.Labels = labels
 	this.Public = public
 	this.Target = target
+	this.Cpu = cpu
+	this.Gpu = gpu
+	this.Memory = memory
+	this.Disk = disk
+	this.Name = name
 	return &this
 }
 
@@ -118,33 +145,6 @@ func (o *Workspace) SetId(v string) {
 	o.Id = v
 }
 
-// GetName returns the Name field value
-// Deprecated
-func (o *Workspace) GetName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Name
-}
-
-// GetNameOk returns a tuple with the Name field value
-// and a boolean to check if the value has been set.
-// Deprecated
-func (o *Workspace) GetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Name, true
-}
-
-// SetName sets field value
-// Deprecated
-func (o *Workspace) SetName(v string) {
-	o.Name = v
-}
-
 // GetOrganizationId returns the OrganizationId field value
 func (o *Workspace) GetOrganizationId() string {
 	if o == nil {
@@ -169,36 +169,36 @@ func (o *Workspace) SetOrganizationId(v string) {
 	o.OrganizationId = v
 }
 
-// GetImage returns the Image field value if set, zero value otherwise.
-func (o *Workspace) GetImage() string {
-	if o == nil || IsNil(o.Image) {
+// GetSnapshot returns the Snapshot field value if set, zero value otherwise.
+func (o *Workspace) GetSnapshot() string {
+	if o == nil || IsNil(o.Snapshot) {
 		var ret string
 		return ret
 	}
-	return *o.Image
+	return *o.Snapshot
 }
 
-// GetImageOk returns a tuple with the Image field value if set, nil otherwise
+// GetSnapshotOk returns a tuple with the Snapshot field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetImageOk() (*string, bool) {
-	if o == nil || IsNil(o.Image) {
+func (o *Workspace) GetSnapshotOk() (*string, bool) {
+	if o == nil || IsNil(o.Snapshot) {
 		return nil, false
 	}
-	return o.Image, true
+	return o.Snapshot, true
 }
 
-// HasImage returns a boolean if a field has been set.
-func (o *Workspace) HasImage() bool {
-	if o != nil && !IsNil(o.Image) {
+// HasSnapshot returns a boolean if a field has been set.
+func (o *Workspace) HasSnapshot() bool {
+	if o != nil && !IsNil(o.Snapshot) {
 		return true
 	}
 
 	return false
 }
 
-// SetImage gets a reference to the given string and assigns it to the Image field.
-func (o *Workspace) SetImage(v string) {
-	o.Image = &v
+// SetSnapshot gets a reference to the given string and assigns it to the Snapshot field.
+func (o *Workspace) SetSnapshot(v string) {
+	o.Snapshot = &v
 }
 
 // GetUser returns the User field value
@@ -321,170 +321,106 @@ func (o *Workspace) SetTarget(v string) {
 	o.Target = v
 }
 
-// GetInfo returns the Info field value if set, zero value otherwise.
-func (o *Workspace) GetInfo() WorkspaceInfo {
-	if o == nil || IsNil(o.Info) {
-		var ret WorkspaceInfo
-		return ret
-	}
-	return *o.Info
-}
-
-// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Workspace) GetInfoOk() (*WorkspaceInfo, bool) {
-	if o == nil || IsNil(o.Info) {
-		return nil, false
-	}
-	return o.Info, true
-}
-
-// HasInfo returns a boolean if a field has been set.
-func (o *Workspace) HasInfo() bool {
-	if o != nil && !IsNil(o.Info) {
-		return true
-	}
-
-	return false
-}
-
-// SetInfo gets a reference to the given WorkspaceInfo and assigns it to the Info field.
-func (o *Workspace) SetInfo(v WorkspaceInfo) {
-	o.Info = &v
-}
-
-// GetCpu returns the Cpu field value if set, zero value otherwise.
+// GetCpu returns the Cpu field value
 func (o *Workspace) GetCpu() float32 {
-	if o == nil || IsNil(o.Cpu) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Cpu
+
+	return o.Cpu
 }
 
-// GetCpuOk returns a tuple with the Cpu field value if set, nil otherwise
+// GetCpuOk returns a tuple with the Cpu field value
 // and a boolean to check if the value has been set.
 func (o *Workspace) GetCpuOk() (*float32, bool) {
-	if o == nil || IsNil(o.Cpu) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Cpu, true
+	return &o.Cpu, true
 }
 
-// HasCpu returns a boolean if a field has been set.
-func (o *Workspace) HasCpu() bool {
-	if o != nil && !IsNil(o.Cpu) {
-		return true
-	}
-
-	return false
-}
-
-// SetCpu gets a reference to the given float32 and assigns it to the Cpu field.
+// SetCpu sets field value
 func (o *Workspace) SetCpu(v float32) {
-	o.Cpu = &v
+	o.Cpu = v
 }
 
-// GetGpu returns the Gpu field value if set, zero value otherwise.
+// GetGpu returns the Gpu field value
 func (o *Workspace) GetGpu() float32 {
-	if o == nil || IsNil(o.Gpu) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Gpu
+
+	return o.Gpu
 }
 
-// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
+// GetGpuOk returns a tuple with the Gpu field value
 // and a boolean to check if the value has been set.
 func (o *Workspace) GetGpuOk() (*float32, bool) {
-	if o == nil || IsNil(o.Gpu) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Gpu, true
+	return &o.Gpu, true
 }
 
-// HasGpu returns a boolean if a field has been set.
-func (o *Workspace) HasGpu() bool {
-	if o != nil && !IsNil(o.Gpu) {
-		return true
-	}
-
-	return false
-}
-
-// SetGpu gets a reference to the given float32 and assigns it to the Gpu field.
+// SetGpu sets field value
 func (o *Workspace) SetGpu(v float32) {
-	o.Gpu = &v
+	o.Gpu = v
 }
 
-// GetMemory returns the Memory field value if set, zero value otherwise.
+// GetMemory returns the Memory field value
 func (o *Workspace) GetMemory() float32 {
-	if o == nil || IsNil(o.Memory) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Memory
+
+	return o.Memory
 }
 
-// GetMemoryOk returns a tuple with the Memory field value if set, nil otherwise
+// GetMemoryOk returns a tuple with the Memory field value
 // and a boolean to check if the value has been set.
 func (o *Workspace) GetMemoryOk() (*float32, bool) {
-	if o == nil || IsNil(o.Memory) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Memory, true
+	return &o.Memory, true
 }
 
-// HasMemory returns a boolean if a field has been set.
-func (o *Workspace) HasMemory() bool {
-	if o != nil && !IsNil(o.Memory) {
-		return true
-	}
-
-	return false
-}
-
-// SetMemory gets a reference to the given float32 and assigns it to the Memory field.
+// SetMemory sets field value
 func (o *Workspace) SetMemory(v float32) {
-	o.Memory = &v
+	o.Memory = v
 }
 
-// GetDisk returns the Disk field value if set, zero value otherwise.
+// GetDisk returns the Disk field value
 func (o *Workspace) GetDisk() float32 {
-	if o == nil || IsNil(o.Disk) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Disk
+
+	return o.Disk
 }
 
-// GetDiskOk returns a tuple with the Disk field value if set, nil otherwise
+// GetDiskOk returns a tuple with the Disk field value
 // and a boolean to check if the value has been set.
 func (o *Workspace) GetDiskOk() (*float32, bool) {
-	if o == nil || IsNil(o.Disk) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Disk, true
+	return &o.Disk, true
 }
 
-// HasDisk returns a boolean if a field has been set.
-func (o *Workspace) HasDisk() bool {
-	if o != nil && !IsNil(o.Disk) {
-		return true
-	}
-
-	return false
-}
-
-// SetDisk gets a reference to the given float32 and assigns it to the Disk field.
+// SetDisk sets field value
 func (o *Workspace) SetDisk(v float32) {
-	o.Disk = &v
+	o.Disk = v
 }
 
 // GetState returns the State field value if set, zero value otherwise.
-func (o *Workspace) GetState() WorkspaceState {
+func (o *Workspace) GetState() SandboxState {
 	if o == nil || IsNil(o.State) {
-		var ret WorkspaceState
+		var ret SandboxState
 		return ret
 	}
 	return *o.State
@@ -492,7 +428,7 @@ func (o *Workspace) GetState() WorkspaceState {
 
 // GetStateOk returns a tuple with the State field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetStateOk() (*WorkspaceState, bool) {
+func (o *Workspace) GetStateOk() (*SandboxState, bool) {
 	if o == nil || IsNil(o.State) {
 		return nil, false
 	}
@@ -508,8 +444,8 @@ func (o *Workspace) HasState() bool {
 	return false
 }
 
-// SetState gets a reference to the given WorkspaceState and assigns it to the State field.
-func (o *Workspace) SetState(v WorkspaceState) {
+// SetState gets a reference to the given SandboxState and assigns it to the State field.
+func (o *Workspace) SetState(v SandboxState) {
 	o.State = &v
 }
 
@@ -543,6 +479,417 @@ func (o *Workspace) HasErrorReason() bool {
 // SetErrorReason gets a reference to the given string and assigns it to the ErrorReason field.
 func (o *Workspace) SetErrorReason(v string) {
 	o.ErrorReason = &v
+}
+
+// GetBackupState returns the BackupState field value if set, zero value otherwise.
+func (o *Workspace) GetBackupState() string {
+	if o == nil || IsNil(o.BackupState) {
+		var ret string
+		return ret
+	}
+	return *o.BackupState
+}
+
+// GetBackupStateOk returns a tuple with the BackupState field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetBackupStateOk() (*string, bool) {
+	if o == nil || IsNil(o.BackupState) {
+		return nil, false
+	}
+	return o.BackupState, true
+}
+
+// HasBackupState returns a boolean if a field has been set.
+func (o *Workspace) HasBackupState() bool {
+	if o != nil && !IsNil(o.BackupState) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackupState gets a reference to the given string and assigns it to the BackupState field.
+func (o *Workspace) SetBackupState(v string) {
+	o.BackupState = &v
+}
+
+// GetBackupCreatedAt returns the BackupCreatedAt field value if set, zero value otherwise.
+func (o *Workspace) GetBackupCreatedAt() string {
+	if o == nil || IsNil(o.BackupCreatedAt) {
+		var ret string
+		return ret
+	}
+	return *o.BackupCreatedAt
+}
+
+// GetBackupCreatedAtOk returns a tuple with the BackupCreatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetBackupCreatedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.BackupCreatedAt) {
+		return nil, false
+	}
+	return o.BackupCreatedAt, true
+}
+
+// HasBackupCreatedAt returns a boolean if a field has been set.
+func (o *Workspace) HasBackupCreatedAt() bool {
+	if o != nil && !IsNil(o.BackupCreatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackupCreatedAt gets a reference to the given string and assigns it to the BackupCreatedAt field.
+func (o *Workspace) SetBackupCreatedAt(v string) {
+	o.BackupCreatedAt = &v
+}
+
+// GetAutoStopInterval returns the AutoStopInterval field value if set, zero value otherwise.
+func (o *Workspace) GetAutoStopInterval() float32 {
+	if o == nil || IsNil(o.AutoStopInterval) {
+		var ret float32
+		return ret
+	}
+	return *o.AutoStopInterval
+}
+
+// GetAutoStopIntervalOk returns a tuple with the AutoStopInterval field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetAutoStopIntervalOk() (*float32, bool) {
+	if o == nil || IsNil(o.AutoStopInterval) {
+		return nil, false
+	}
+	return o.AutoStopInterval, true
+}
+
+// HasAutoStopInterval returns a boolean if a field has been set.
+func (o *Workspace) HasAutoStopInterval() bool {
+	if o != nil && !IsNil(o.AutoStopInterval) {
+		return true
+	}
+
+	return false
+}
+
+// SetAutoStopInterval gets a reference to the given float32 and assigns it to the AutoStopInterval field.
+func (o *Workspace) SetAutoStopInterval(v float32) {
+	o.AutoStopInterval = &v
+}
+
+// GetAutoArchiveInterval returns the AutoArchiveInterval field value if set, zero value otherwise.
+func (o *Workspace) GetAutoArchiveInterval() float32 {
+	if o == nil || IsNil(o.AutoArchiveInterval) {
+		var ret float32
+		return ret
+	}
+	return *o.AutoArchiveInterval
+}
+
+// GetAutoArchiveIntervalOk returns a tuple with the AutoArchiveInterval field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetAutoArchiveIntervalOk() (*float32, bool) {
+	if o == nil || IsNil(o.AutoArchiveInterval) {
+		return nil, false
+	}
+	return o.AutoArchiveInterval, true
+}
+
+// HasAutoArchiveInterval returns a boolean if a field has been set.
+func (o *Workspace) HasAutoArchiveInterval() bool {
+	if o != nil && !IsNil(o.AutoArchiveInterval) {
+		return true
+	}
+
+	return false
+}
+
+// SetAutoArchiveInterval gets a reference to the given float32 and assigns it to the AutoArchiveInterval field.
+func (o *Workspace) SetAutoArchiveInterval(v float32) {
+	o.AutoArchiveInterval = &v
+}
+
+// GetRunnerDomain returns the RunnerDomain field value if set, zero value otherwise.
+func (o *Workspace) GetRunnerDomain() string {
+	if o == nil || IsNil(o.RunnerDomain) {
+		var ret string
+		return ret
+	}
+	return *o.RunnerDomain
+}
+
+// GetRunnerDomainOk returns a tuple with the RunnerDomain field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetRunnerDomainOk() (*string, bool) {
+	if o == nil || IsNil(o.RunnerDomain) {
+		return nil, false
+	}
+	return o.RunnerDomain, true
+}
+
+// HasRunnerDomain returns a boolean if a field has been set.
+func (o *Workspace) HasRunnerDomain() bool {
+	if o != nil && !IsNil(o.RunnerDomain) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunnerDomain gets a reference to the given string and assigns it to the RunnerDomain field.
+func (o *Workspace) SetRunnerDomain(v string) {
+	o.RunnerDomain = &v
+}
+
+// GetVolumes returns the Volumes field value if set, zero value otherwise.
+func (o *Workspace) GetVolumes() []SandboxVolume {
+	if o == nil || IsNil(o.Volumes) {
+		var ret []SandboxVolume
+		return ret
+	}
+	return o.Volumes
+}
+
+// GetVolumesOk returns a tuple with the Volumes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetVolumesOk() ([]SandboxVolume, bool) {
+	if o == nil || IsNil(o.Volumes) {
+		return nil, false
+	}
+	return o.Volumes, true
+}
+
+// HasVolumes returns a boolean if a field has been set.
+func (o *Workspace) HasVolumes() bool {
+	if o != nil && !IsNil(o.Volumes) {
+		return true
+	}
+
+	return false
+}
+
+// SetVolumes gets a reference to the given []SandboxVolume and assigns it to the Volumes field.
+func (o *Workspace) SetVolumes(v []SandboxVolume) {
+	o.Volumes = v
+}
+
+// GetBuildInfo returns the BuildInfo field value if set, zero value otherwise.
+func (o *Workspace) GetBuildInfo() BuildInfo {
+	if o == nil || IsNil(o.BuildInfo) {
+		var ret BuildInfo
+		return ret
+	}
+	return *o.BuildInfo
+}
+
+// GetBuildInfoOk returns a tuple with the BuildInfo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetBuildInfoOk() (*BuildInfo, bool) {
+	if o == nil || IsNil(o.BuildInfo) {
+		return nil, false
+	}
+	return o.BuildInfo, true
+}
+
+// HasBuildInfo returns a boolean if a field has been set.
+func (o *Workspace) HasBuildInfo() bool {
+	if o != nil && !IsNil(o.BuildInfo) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildInfo gets a reference to the given BuildInfo and assigns it to the BuildInfo field.
+func (o *Workspace) SetBuildInfo(v BuildInfo) {
+	o.BuildInfo = &v
+}
+
+// GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
+func (o *Workspace) GetCreatedAt() string {
+	if o == nil || IsNil(o.CreatedAt) {
+		var ret string
+		return ret
+	}
+	return *o.CreatedAt
+}
+
+// GetCreatedAtOk returns a tuple with the CreatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetCreatedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.CreatedAt) {
+		return nil, false
+	}
+	return o.CreatedAt, true
+}
+
+// HasCreatedAt returns a boolean if a field has been set.
+func (o *Workspace) HasCreatedAt() bool {
+	if o != nil && !IsNil(o.CreatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedAt gets a reference to the given string and assigns it to the CreatedAt field.
+func (o *Workspace) SetCreatedAt(v string) {
+	o.CreatedAt = &v
+}
+
+// GetUpdatedAt returns the UpdatedAt field value if set, zero value otherwise.
+func (o *Workspace) GetUpdatedAt() string {
+	if o == nil || IsNil(o.UpdatedAt) {
+		var ret string
+		return ret
+	}
+	return *o.UpdatedAt
+}
+
+// GetUpdatedAtOk returns a tuple with the UpdatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetUpdatedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.UpdatedAt) {
+		return nil, false
+	}
+	return o.UpdatedAt, true
+}
+
+// HasUpdatedAt returns a boolean if a field has been set.
+func (o *Workspace) HasUpdatedAt() bool {
+	if o != nil && !IsNil(o.UpdatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetUpdatedAt gets a reference to the given string and assigns it to the UpdatedAt field.
+func (o *Workspace) SetUpdatedAt(v string) {
+	o.UpdatedAt = &v
+}
+
+// GetClass returns the Class field value if set, zero value otherwise.
+// Deprecated
+func (o *Workspace) GetClass() string {
+	if o == nil || IsNil(o.Class) {
+		var ret string
+		return ret
+	}
+	return *o.Class
+}
+
+// GetClassOk returns a tuple with the Class field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// Deprecated
+func (o *Workspace) GetClassOk() (*string, bool) {
+	if o == nil || IsNil(o.Class) {
+		return nil, false
+	}
+	return o.Class, true
+}
+
+// HasClass returns a boolean if a field has been set.
+func (o *Workspace) HasClass() bool {
+	if o != nil && !IsNil(o.Class) {
+		return true
+	}
+
+	return false
+}
+
+// SetClass gets a reference to the given string and assigns it to the Class field.
+// Deprecated
+func (o *Workspace) SetClass(v string) {
+	o.Class = &v
+}
+
+// GetDaemonVersion returns the DaemonVersion field value if set, zero value otherwise.
+func (o *Workspace) GetDaemonVersion() string {
+	if o == nil || IsNil(o.DaemonVersion) {
+		var ret string
+		return ret
+	}
+	return *o.DaemonVersion
+}
+
+// GetDaemonVersionOk returns a tuple with the DaemonVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetDaemonVersionOk() (*string, bool) {
+	if o == nil || IsNil(o.DaemonVersion) {
+		return nil, false
+	}
+	return o.DaemonVersion, true
+}
+
+// HasDaemonVersion returns a boolean if a field has been set.
+func (o *Workspace) HasDaemonVersion() bool {
+	if o != nil && !IsNil(o.DaemonVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetDaemonVersion gets a reference to the given string and assigns it to the DaemonVersion field.
+func (o *Workspace) SetDaemonVersion(v string) {
+	o.DaemonVersion = &v
+}
+
+// GetName returns the Name field value
+func (o *Workspace) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *Workspace) SetName(v string) {
+	o.Name = v
+}
+
+// GetImage returns the Image field value if set, zero value otherwise.
+func (o *Workspace) GetImage() string {
+	if o == nil || IsNil(o.Image) {
+		var ret string
+		return ret
+	}
+	return *o.Image
+}
+
+// GetImageOk returns a tuple with the Image field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetImageOk() (*string, bool) {
+	if o == nil || IsNil(o.Image) {
+		return nil, false
+	}
+	return o.Image, true
+}
+
+// HasImage returns a boolean if a field has been set.
+func (o *Workspace) HasImage() bool {
+	if o != nil && !IsNil(o.Image) {
+		return true
+	}
+
+	return false
+}
+
+// SetImage gets a reference to the given string and assigns it to the Image field.
+func (o *Workspace) SetImage(v string) {
+	o.Image = &v
 }
 
 // GetSnapshotState returns the SnapshotState field value if set, zero value otherwise.
@@ -609,68 +956,36 @@ func (o *Workspace) SetSnapshotCreatedAt(v string) {
 	o.SnapshotCreatedAt = &v
 }
 
-// GetAutoStopInterval returns the AutoStopInterval field value if set, zero value otherwise.
-func (o *Workspace) GetAutoStopInterval() float32 {
-	if o == nil || IsNil(o.AutoStopInterval) {
-		var ret float32
+// GetInfo returns the Info field value if set, zero value otherwise.
+func (o *Workspace) GetInfo() SandboxInfo {
+	if o == nil || IsNil(o.Info) {
+		var ret SandboxInfo
 		return ret
 	}
-	return *o.AutoStopInterval
+	return *o.Info
 }
 
-// GetAutoStopIntervalOk returns a tuple with the AutoStopInterval field value if set, nil otherwise
+// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetAutoStopIntervalOk() (*float32, bool) {
-	if o == nil || IsNil(o.AutoStopInterval) {
+func (o *Workspace) GetInfoOk() (*SandboxInfo, bool) {
+	if o == nil || IsNil(o.Info) {
 		return nil, false
 	}
-	return o.AutoStopInterval, true
+	return o.Info, true
 }
 
-// HasAutoStopInterval returns a boolean if a field has been set.
-func (o *Workspace) HasAutoStopInterval() bool {
-	if o != nil && !IsNil(o.AutoStopInterval) {
+// HasInfo returns a boolean if a field has been set.
+func (o *Workspace) HasInfo() bool {
+	if o != nil && !IsNil(o.Info) {
 		return true
 	}
 
 	return false
 }
 
-// SetAutoStopInterval gets a reference to the given float32 and assigns it to the AutoStopInterval field.
-func (o *Workspace) SetAutoStopInterval(v float32) {
-	o.AutoStopInterval = &v
-}
-
-// GetVolumes returns the Volumes field value if set, zero value otherwise.
-func (o *Workspace) GetVolumes() []WorkspaceVolume {
-	if o == nil || IsNil(o.Volumes) {
-		var ret []WorkspaceVolume
-		return ret
-	}
-	return o.Volumes
-}
-
-// GetVolumesOk returns a tuple with the Volumes field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Workspace) GetVolumesOk() ([]WorkspaceVolume, bool) {
-	if o == nil || IsNil(o.Volumes) {
-		return nil, false
-	}
-	return o.Volumes, true
-}
-
-// HasVolumes returns a boolean if a field has been set.
-func (o *Workspace) HasVolumes() bool {
-	if o != nil && !IsNil(o.Volumes) {
-		return true
-	}
-
-	return false
-}
-
-// SetVolumes gets a reference to the given []WorkspaceVolume and assigns it to the Volumes field.
-func (o *Workspace) SetVolumes(v []WorkspaceVolume) {
-	o.Volumes = v
+// SetInfo gets a reference to the given SandboxInfo and assigns it to the Info field.
+func (o *Workspace) SetInfo(v SandboxInfo) {
+	o.Info = &v
 }
 
 func (o Workspace) MarshalJSON() ([]byte, error) {
@@ -684,36 +999,61 @@ func (o Workspace) MarshalJSON() ([]byte, error) {
 func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	toSerialize["name"] = o.Name
 	toSerialize["organizationId"] = o.OrganizationId
-	if !IsNil(o.Image) {
-		toSerialize["image"] = o.Image
+	if !IsNil(o.Snapshot) {
+		toSerialize["snapshot"] = o.Snapshot
 	}
 	toSerialize["user"] = o.User
 	toSerialize["env"] = o.Env
 	toSerialize["labels"] = o.Labels
 	toSerialize["public"] = o.Public
 	toSerialize["target"] = o.Target
-	if !IsNil(o.Info) {
-		toSerialize["info"] = o.Info
-	}
-	if !IsNil(o.Cpu) {
-		toSerialize["cpu"] = o.Cpu
-	}
-	if !IsNil(o.Gpu) {
-		toSerialize["gpu"] = o.Gpu
-	}
-	if !IsNil(o.Memory) {
-		toSerialize["memory"] = o.Memory
-	}
-	if !IsNil(o.Disk) {
-		toSerialize["disk"] = o.Disk
-	}
+	toSerialize["cpu"] = o.Cpu
+	toSerialize["gpu"] = o.Gpu
+	toSerialize["memory"] = o.Memory
+	toSerialize["disk"] = o.Disk
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
 	}
 	if !IsNil(o.ErrorReason) {
 		toSerialize["errorReason"] = o.ErrorReason
+	}
+	if !IsNil(o.BackupState) {
+		toSerialize["backupState"] = o.BackupState
+	}
+	if !IsNil(o.BackupCreatedAt) {
+		toSerialize["backupCreatedAt"] = o.BackupCreatedAt
+	}
+	if !IsNil(o.AutoStopInterval) {
+		toSerialize["autoStopInterval"] = o.AutoStopInterval
+	}
+	if !IsNil(o.AutoArchiveInterval) {
+		toSerialize["autoArchiveInterval"] = o.AutoArchiveInterval
+	}
+	if !IsNil(o.RunnerDomain) {
+		toSerialize["runnerDomain"] = o.RunnerDomain
+	}
+	if !IsNil(o.Volumes) {
+		toSerialize["volumes"] = o.Volumes
+	}
+	if !IsNil(o.BuildInfo) {
+		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.CreatedAt) {
+		toSerialize["createdAt"] = o.CreatedAt
+	}
+	if !IsNil(o.UpdatedAt) {
+		toSerialize["updatedAt"] = o.UpdatedAt
+	}
+	if !IsNil(o.Class) {
+		toSerialize["class"] = o.Class
+	}
+	if !IsNil(o.DaemonVersion) {
+		toSerialize["daemonVersion"] = o.DaemonVersion
+	}
+	toSerialize["name"] = o.Name
+	if !IsNil(o.Image) {
+		toSerialize["image"] = o.Image
 	}
 	if !IsNil(o.SnapshotState) {
 		toSerialize["snapshotState"] = o.SnapshotState
@@ -721,11 +1061,8 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.SnapshotCreatedAt) {
 		toSerialize["snapshotCreatedAt"] = o.SnapshotCreatedAt
 	}
-	if !IsNil(o.AutoStopInterval) {
-		toSerialize["autoStopInterval"] = o.AutoStopInterval
-	}
-	if !IsNil(o.Volumes) {
-		toSerialize["volumes"] = o.Volumes
+	if !IsNil(o.Info) {
+		toSerialize["info"] = o.Info
 	}
 	return toSerialize, nil
 }
@@ -736,13 +1073,17 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"id",
-		"name",
 		"organizationId",
 		"user",
 		"env",
 		"labels",
 		"public",
 		"target",
+		"cpu",
+		"gpu",
+		"memory",
+		"disk",
+		"name",
 	}
 
 	allProperties := make(map[string]interface{})

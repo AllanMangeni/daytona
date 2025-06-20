@@ -1,3 +1,6 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 /*
 Daytona
 
@@ -23,7 +26,7 @@ var _ MappedNullable = &GitStatus{}
 // GitStatus struct for GitStatus
 type GitStatus struct {
 	CurrentBranch   string       `json:"currentBranch"`
-	FileStatus      []FileStatus `json:"FileStatus[]"`
+	FileStatus      []FileStatus `json:"fileStatus"`
 	Ahead           *float32     `json:"ahead,omitempty"`
 	Behind          *float32     `json:"behind,omitempty"`
 	BranchPublished *bool        `json:"branchPublished,omitempty"`
@@ -205,7 +208,7 @@ func (o GitStatus) MarshalJSON() ([]byte, error) {
 func (o GitStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["currentBranch"] = o.CurrentBranch
-	toSerialize["FileStatus[]"] = o.FileStatus
+	toSerialize["fileStatus"] = o.FileStatus
 	if !IsNil(o.Ahead) {
 		toSerialize["ahead"] = o.Ahead
 	}
@@ -224,7 +227,7 @@ func (o *GitStatus) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"currentBranch",
-		"FileStatus[]",
+		"fileStatus",
 	}
 
 	allProperties := make(map[string]interface{})

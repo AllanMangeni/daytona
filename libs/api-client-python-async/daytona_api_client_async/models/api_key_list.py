@@ -1,4 +1,7 @@
 # coding: utf-8
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 
 """
     Daytona
@@ -32,16 +35,17 @@ class ApiKeyList(BaseModel):
     value: StrictStr = Field(description="The masked API key value")
     created_at: datetime = Field(description="When the API key was created", alias="createdAt")
     permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
-    last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
+    last_used_at: Optional[datetime] = Field(description="When the API key was last used", alias="lastUsedAt")
+    expires_at: Optional[datetime] = Field(description="When the API key expires", alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt"]
+    __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt", "expiresAt"]
 
     @field_validator('permissions')
     def permissions_validate_enum(cls, value):
         """Validates the enum"""
         for i in value:
-            if i not in set(['write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes']):
-                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')")
+            if i not in set(['write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes']):
+                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')")
         return value
 
     model_config = ConfigDict(
@@ -95,6 +99,11 @@ class ApiKeyList(BaseModel):
         if self.last_used_at is None and "last_used_at" in self.model_fields_set:
             _dict['lastUsedAt'] = None
 
+        # set to None if expires_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_at is None and "expires_at" in self.model_fields_set:
+            _dict['expiresAt'] = None
+
         return _dict
 
     @classmethod
@@ -111,7 +120,8 @@ class ApiKeyList(BaseModel):
             "value": obj.get("value"),
             "createdAt": obj.get("createdAt"),
             "permissions": obj.get("permissions"),
-            "lastUsedAt": obj.get("lastUsedAt")
+            "lastUsedAt": obj.get("lastUsedAt"),
+            "expiresAt": obj.get("expiresAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

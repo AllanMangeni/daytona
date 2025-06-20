@@ -11,6 +11,8 @@ import (
 	"os"
 	"path"
 
+	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
+	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
@@ -19,6 +21,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
+	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -44,7 +47,7 @@ func (s *Server) GetProjectDir(ctx *gin.Context) {
 
 func (s *Server) Start() error {
 	// Set Gin to release mode in production
-	if os.Getenv("NODE_ENV") == "production" {
+	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -53,6 +56,12 @@ func (s *Server) Start() error {
 	r.Use(middlewares.LoggingMiddleware())
 	r.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
+
+	r.GET("/version", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"version": internal.Version,
+		})
+	})
 
 	r.GET("/project-dir", s.GetProjectDir)
 
@@ -144,6 +153,11 @@ func (s *Server) Start() error {
 	{
 		portController.GET("", portDetector.GetPorts)
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
+	}
+
+	proxyController := r.Group("/proxy")
+	{
+		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget))
 	}
 
 	go portDetector.Start(context.Background())

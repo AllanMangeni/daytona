@@ -1,10 +1,9 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { ToolboxApi, ListBranchResponse, GitStatus } from '@daytonaio/api-client'
-import { Sandbox, SandboxInstance } from './Sandbox'
 import { prefixRelativePath } from './utils/Path'
 
 /**
@@ -24,9 +23,8 @@ export interface GitCommitResponse {
  */
 export class Git {
   constructor(
-    private readonly sandbox: Sandbox,
+    private readonly sandboxId: string,
     private readonly toolboxApi: ToolboxApi,
-    private readonly instance: SandboxInstance,
     private readonly getRootDir: () => Promise<string>,
   ) {}
 
@@ -48,7 +46,7 @@ export class Git {
    * await git.add('workspace/repo', ['.']);
    */
   public async add(path: string, files: string[]): Promise<void> {
-    await this.toolboxApi.gitAddFiles(this.instance.id, {
+    await this.toolboxApi.gitAddFiles(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       files,
     })
@@ -67,10 +65,67 @@ export class Git {
    */
   public async branches(path: string): Promise<ListBranchResponse> {
     const response = await this.toolboxApi.gitListBranches(
-      this.instance.id,
+      this.sandboxId,
       prefixRelativePath(await this.getRootDir(), path),
     )
     return response.data
+  }
+
+  /**
+   * Create branche in the repository.
+   *
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the user's
+   * root directory.
+   * @param {string} name - Name of the new branch to create
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await git.createBranch('workspace/repo', 'new-feature');
+   */
+  public async createBranch(path: string, name: string): Promise<void> {
+    await this.toolboxApi.gitCreateBranch(this.sandboxId, {
+      path: prefixRelativePath(await this.getRootDir(), path),
+      name,
+    })
+    return
+  }
+
+  /**
+   * Delete branche in the repository.
+   *
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the user's
+   * root directory.
+   * @param {string} name - Name of the branch to delete
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await git.deleteBranch('workspace/repo', 'new-feature');
+   */
+  public async deleteBranch(path: string, name: string): Promise<void> {
+    await this.toolboxApi.gitDeleteBranch(this.sandboxId, {
+      path: prefixRelativePath(await this.getRootDir(), path),
+      name,
+    })
+    return
+  }
+
+  /**
+   * Checkout branche in the repository.
+   *
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the user's
+   * root directory.
+   * @param {string} branch - Name of the branch to checkout
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await git.checkoutBranch('workspace/repo', 'new-feature');
+   */
+  public async checkoutBranch(path: string, branch: string): Promise<void> {
+    await this.toolboxApi.gitCheckoutBranch(this.sandboxId, {
+      path: prefixRelativePath(await this.getRootDir(), path),
+      branch,
+    })
+    return
   }
 
   /**
@@ -120,7 +175,7 @@ export class Git {
     username?: string,
     password?: string,
   ): Promise<void> {
-    await this.toolboxApi.gitCloneRepository(this.instance.id, {
+    await this.toolboxApi.gitCloneRepository(this.sandboxId, {
       url: url,
       branch: branch,
       path: prefixRelativePath(await this.getRootDir(), path),
@@ -151,7 +206,7 @@ export class Git {
    * );
    */
   public async commit(path: string, message: string, author: string, email: string): Promise<GitCommitResponse> {
-    const response = await this.toolboxApi.gitCommitChanges(this.instance.id, {
+    const response = await this.toolboxApi.gitCommitChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       message,
       author,
@@ -184,7 +239,7 @@ export class Git {
    * );
    */
   public async push(path: string, username?: string, password?: string): Promise<void> {
-    await this.toolboxApi.gitPushChanges(this.instance.id, {
+    await this.toolboxApi.gitPushChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       username,
       password,
@@ -213,7 +268,7 @@ export class Git {
    * );
    */
   public async pull(path: string, username?: string, password?: string): Promise<void> {
-    await this.toolboxApi.gitPullChanges(this.instance.id, {
+    await this.toolboxApi.gitPullChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       username,
       password,
@@ -240,7 +295,7 @@ export class Git {
    */
   public async status(path: string): Promise<GitStatus> {
     const response = await this.toolboxApi.gitGetStatus(
-      this.instance.id,
+      this.sandboxId,
       prefixRelativePath(await this.getRootDir(), path),
     )
     return response.data

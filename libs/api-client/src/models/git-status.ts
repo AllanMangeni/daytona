@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -33,7 +38,7 @@ export interface GitStatus {
    * @type {Array<FileStatus>}
    * @memberof GitStatus
    */
-  'FileStatus[]': Array<FileStatus>
+  fileStatus: Array<FileStatus>
   /**
    *
    * @type {number}
